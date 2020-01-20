@@ -1,0 +1,13 @@
+clear
+clear
+ls
+clear
+history
+history
+ls
+history
+clear
+history
+ls
+history
+clear
