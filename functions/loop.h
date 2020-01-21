@@ -3,6 +3,7 @@
 
 #include "funcs.h"
 #include <limits.h>
+#include "lib/helper.h"
 
 int lush_launch(char **args)
 {
@@ -33,7 +34,11 @@ int lush_execute(char **args)
 {
   int i;
   FILE* history;
-  history = fopen("functions/history.txt", "a");
+  char buffer[100];
+  int cx;
+  const char* s = getenv("HOME");
+  cx = snprintf ( buffer, 100, "%s/Documents/history.txt", s);
+  history = fopen(buffer, "a");
 
   if (args[0] == NULL) {
     return 1;
@@ -93,11 +98,7 @@ char *lsh_read_line(void)
 
 #define LSH_TOK_BUFSIZE 64
 #define LSH_TOK_DELIM " \t\r\n\a"
-/**
-   @brief Split a line into tokens (very naively).
-   @param line The line.
-   @return Null-terminated array of tokens.
- */
+
 char **lsh_split_line(char *line)
 {
   int bufsize = LSH_TOK_BUFSIZE, position = 0;
@@ -144,7 +145,12 @@ void lsh_loop(void)
     char cwd[PATH_MAX];
     if (getcwd(cwd, sizeof(cwd)) != NULL) 
     {
-      printf("\033[22;31m%s\033[0m\n", cwd);
+      if(checkIfGit(cwd) == true){
+        printf("\033[22;31m%s\033[0m%s\n", cwd, " (git)");
+      }
+      else {
+        printf("\033[22;31m%s\033[0m\n", cwd);
+      }
     } 
     else 
     {

@@ -5,8 +5,13 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <dirent.h> 
 #include <string.h>
+#include <limits.h>
+#include <pwd.h>
+#include "lib/helper.h"
 
 
 int lush_cd(char **args);
@@ -15,8 +20,11 @@ int lush_exit(char **args);
 int lush_ls(char **args);
 int lush_clear(char **args);
 int lush_history(char **args);
+int lush_clhist(char **args);
+int lush_pwd();
 int lush_mkdir(char **args);
 int lush_rmdir(char **args);
+int lush_rm(char **args);
 int lush_touch(char **args);
 
 
@@ -27,9 +35,12 @@ char *builtin_str[] = {
   "ls",
   "clear",
   "history",
+  "clhist",
+  "pwd",
   "mkdir",
-  "rmdir",
-  "touch"
+  "touch",
+  "rm",
+  "rmdir"
 };
 
 int (*builtin_func[]) (char **) = {
@@ -38,11 +49,80 @@ int (*builtin_func[]) (char **) = {
   &lush_exit,
   &lush_ls,
   &lush_clear,
-  &lush_history
+  &lush_history,
+  &lush_clhist,
+  &lush_pwd,
+  &lush_mkdir,
+  &lush_touch,
+  &lush_rm,
+  &lush_rmdir,
 };
 
 int lsh_num_builtins() {
   return sizeof(builtin_str) / sizeof(char *);
+}
+
+int lush_rm(char **args){
+  int result = remove(args[1]);
+  if(result != -1){
+    return 1;
+  }
+  printf("Couldn't delete file");
+  return 1;
+}
+
+int lush_rmdir(char **args){
+  int result = 0;
+  if(args[1]){
+    result = rmdir(args[1]);
+    if(result == -1){
+      printf("Directory is not empty man");
+    }
+  }else{
+    printf("Cant delete");  
+  }
+  return 1;
+}
+
+int lush_touch(char **args){
+  FILE* newFile;
+  newFile = fopen(args[1], "w");
+  fclose(newFile);
+  return 1;
+}
+
+int lush_mkdir(char **args){
+  int result = 0;
+  if(args[1]){
+    result = mkdir(args[1], 0777);
+  }
+  return 1;
+}
+
+int lush_clhist(char **args){
+  FILE *history;
+  char buffer[100];
+  int cx;
+  const char* s = getenv("HOME");
+  cx = snprintf ( buffer, 100, "%s/Documents/history.txt", s);
+  history = fopen(buffer, "w");
+  fputs("", history);
+  fclose(history);
+  return 1;
+}
+
+int lush_pwd(char **args){
+  char cwd[PATH_MAX];
+    if (getcwd(cwd, sizeof(cwd)) != NULL) 
+    {
+      printf("%s", cwd);
+    } 
+    else {
+      printf("Error");
+    }
+
+    return 1;
+  
 }
 
 int lush_history(char **args){
@@ -50,7 +130,11 @@ int lush_history(char **args){
   char input[255];
   int counter = 1;
   FILE *history;
-  history = fopen("functions/history.txt", "r");
+  char buffer[100];
+  int cx;
+  const char* s = getenv("HOME");
+  cx = snprintf ( buffer, 100, "%s/Documents/history.txt", s);
+  history = fopen(buffer, "r");
   
   do 
   {
@@ -69,11 +153,16 @@ int lush_history(char **args){
 int lush_ls(char **args){
   DIR *d;
   struct dirent *dir;
-  d = opendir(".");
+  if(args[1]){
+    d = opendir(args[1]);
+  }
+  else{
+    d = opendir(".");
+  }
   if (d) {
     while ((dir = readdir(d)) != NULL) {
-      if((dir->d_name != ".") && (dir->d_name != "..")){
-        printf("\033[22;35m%s\033[0m ", dir->d_name);
+      if(strcmp(dir->d_name,".") != 0 && strcmp(dir->d_name, "..") != 0 ){
+        printf("\033[22;32m%s\033[0m ", dir->d_name);
       }
     }
     closedir(d);
@@ -92,7 +181,15 @@ int lush_cd(char **args)
 {
   if (args[1] == NULL) {
     fprintf(stderr, "lush: expected argument to \"cd\"\n");
-  } else {
+  }
+  else if(strstr(args[1], "~") != NULL){
+    char* s = getenv("HOME");
+    char* result = replaceSubString(args[1],"~", s);
+    if (chdir(result) != 0) {
+      perror("lush");
+    }
+  }
+  else {
     if (chdir(args[1]) != 0) {
       perror("lush");
     }
