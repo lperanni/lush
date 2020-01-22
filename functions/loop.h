@@ -37,7 +37,7 @@ int lush_execute(char **args)
   char buffer[100];
   int cx;
   const char* s = getenv("HOME");
-  cx = snprintf ( buffer, 100, "%s/Documents/history.txt", s);
+  cx = snprintf ( buffer, 100, "%s/history.txt", s);
   history = fopen(buffer, "a");
 
   if (args[0] == NULL) {

@@ -107,7 +107,7 @@ int lush_clhist(char **args){
   char buffer[100];
   int cx;
   const char* s = getenv("HOME");
-  cx = snprintf ( buffer, 100, "%s/Documents/history.txt", s);
+  cx = snprintf ( buffer, 100, "%s/history.txt", s);
   history = fopen(buffer, "w");
   fputs("", history);
   fclose(history);
@@ -136,7 +136,7 @@ int lush_history(char **args){
   char buffer[100];
   int cx;
   const char* s = getenv("HOME");
-  cx = snprintf ( buffer, 100, "%s/Documents/history.txt", s);
+  cx = snprintf ( buffer, 100, "%s/history.txt", s);
   history = fopen(buffer, "r");
   
   do 
