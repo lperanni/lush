@@ -140,16 +140,23 @@ void lsh_loop(void)
   char *line;
   char **args;
   int status;
+  char *user=getenv("USER");
+  if(!user){
+    user = "default";
+  }
+  char hostname[1024];
+  gethostname(hostname, 1024);
 
   do {
     char cwd[PATH_MAX];
     if (getcwd(cwd, sizeof(cwd)) != NULL) 
     {
       if(checkIfGit(cwd) == true){
-        printf("\033[22;31m%s\033[0m%s\n", cwd, " (git)");
+        char *branch = getGitBranch(cwd);
+        printf("\033[22;35m%s@%s \033[22;31m%s \033[22;36m(%s)\033[0m\n", user, hostname,cwd, branch);
       }
       else {
-        printf("\033[22;31m%s\033[0m\n", cwd);
+        printf("\033[22;35m%s@%s \033[22;31m%s\033[0m\n", user, hostname,cwd);
       }
     } 
     else 

@@ -34,4 +34,19 @@ bool checkIfGit(char* cwd){
   return false;
 }
 
+char* getGitBranch(char* path){
+  FILE* fp;
+  fp = fopen(".git/HEAD", "r");
+  char *fileText = malloc(sizeof(char)* 50);
+
+
+  fgets(fileText,100,fp);
+  fclose(fp);
+  strtok(fileText, "\n");
+  strtok(fileText, "/");
+  strtok(NULL, "/");
+  
+  return strtok(NULL, "/");
+}
+
 #endif

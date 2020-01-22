@@ -26,6 +26,7 @@ int lush_mkdir(char **args);
 int lush_rmdir(char **args);
 int lush_rm(char **args);
 int lush_touch(char **args);
+int lush_cat(char **args);
 
 
 char *builtin_str[] = {
@@ -40,7 +41,8 @@ char *builtin_str[] = {
   "mkdir",
   "touch",
   "rm",
-  "rmdir"
+  "rmdir",
+  "cat",
 };
 
 int (*builtin_func[]) (char **) = {
@@ -56,6 +58,7 @@ int (*builtin_func[]) (char **) = {
   &lush_touch,
   &lush_rm,
   &lush_rmdir,
+  &lush_cat
 };
 
 int lsh_num_builtins() {
@@ -200,7 +203,7 @@ int lush_cd(char **args)
 int lush_help(char **args)
 {
   int i;
-  printf("Stephen Brennan's LSH\n");
+  printf("Luciano Peranni's LUSH\n");
   printf("Type program names and arguments, and hit enter.\n");
   printf("The following are built in:\n");
 
@@ -210,6 +213,27 @@ int lush_help(char **args)
 
   printf("Use the man command for information on other programs.\n");
   return 1;
+}
+
+int lush_cat(char **args){
+    FILE * fp;
+    char * line = NULL;
+    size_t len = 0;
+    ssize_t read;
+
+    
+    fp = fopen(args[1], "r");
+    if (fp == NULL)
+        return 1;
+
+    while ((read = getline(&line, &len, fp)) != -1) {
+        printf("%s", line);
+    }
+
+    fclose(fp);
+    if (line)
+        free(line);
+    return 1;
 }
 
 int lush_exit(char **args)
