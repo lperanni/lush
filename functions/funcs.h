@@ -165,7 +165,12 @@ int lush_ls(char **args){
   if (d) {
     while ((dir = readdir(d)) != NULL) {
       if(strcmp(dir->d_name,".") != 0 && strcmp(dir->d_name, "..") != 0 ){
-        printf("\033[22;32m%s\033[0m ", dir->d_name);
+        if(countWords(dir->d_name) == 1){
+          printf("\033[22;32m%s\033[0m ", dir->d_name);
+        }
+        else {
+          printf("'\033[22;32m%s\033[0m' ", dir->d_name);
+        }
       }
     }
     closedir(d);

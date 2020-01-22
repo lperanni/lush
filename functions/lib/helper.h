@@ -49,4 +49,17 @@ char* getGitBranch(char* path){
   return strtok(NULL, "/");
 }
 
+int countWords(char* string){
+
+	int len,i,word=1;
+	len=strlen(string);
+	for(i=0;i<len;i++)
+	{
+		if(string[i]!=' ' && string[i+1]==' ')
+			word=word+1;
+	}
+
+  return word;
+}
+
 #endif
